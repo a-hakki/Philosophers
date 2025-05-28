@@ -6,47 +6,80 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/05/28 12:14:00 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/05/28 22:30:44 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "philo.h"
+#include "philo.h"
+#include "libft/libft.h"
 
-void *f1(void *vars)
+int parse_args(t_rules *rules, char **av, int ac)
 {
-	t_vars *args = (t_vars *)vars;
-	int i = 0;
-	while (1)
+	rules->philo_n = ft_atoi(av[1]);
+	rules->die_time = ft_atoi(av[2]);
+	rules->eat_time = ft_atoi(av[3]);
+	rules->sleep_time = ft_atoi(av[4]);
+	rules->meal_n = -1;
+
+	if (ac == 6)
+		rules->meal_n = ft_atoi(av[5]);
+	if (rules->philo_n <= 0 || rules->die_time <= 0 || rules->eat_time <= 0 || rules->sleep_time <= 0)
+		return (0);
+	if (ac == 6 && rules->meal_n <= 0)
+		return (0);
+	return (1);
+}
+
+int	init_philosophers(t_rules *rules)
+{
+	int	i;
+
+	rules->forks = malloc(sizeof(pthread_mutex_t) * rules->philo_n);
+	if (!rules->forks)
+		return (1);
+	i = 0;
+	while (i < rules->philo_n)
 	{
-		pthread_mutex_lock(&args->mut);
-		args->eat_time++;
-		pthread_mutex_unlock(&args->mut);
-		
+		if (pthread_mutex_init(&rules->forks[i], NULL) != 0)
+			return (1);
 		i++;
-		if (i == 1000000)
-			break;
 	}
-	return (NULL);
+	rules->philos = malloc(sizeof(t_philo) * rules->philo_n);
+	if (!rules->philos)
+		return (free(rules->forks), 1);
+	i = 0;
+	while (i < rules->philo_n)
+	{
+		rules->philos[i].id = i + 1;
+		rules->philos[i].left_fork = i;
+		rules->philos[i].right_fork = (i + 1) % rules->philo_n;
+		rules->philos[i].meal_count = 0;
+		rules->philos[i].last_meal = 0;
+		rules->philos[i].rules = rules;
+		i++;
+	}
+	pthread_mutex_init(&rules->print_mutex, NULL);
+	return (0);
 }
 
 int main(int ac, char **av)
 {
-	t_vars vars;
-	vars.philo_n = 4;
-	vars.sleep_time = 200;
-	vars.die_time = 500;
-	vars.eat_time = 0;
-	vars.boul = 1;
-	pthread_mutex_init(&vars.mut, NULL);
+	int i;
 
-	pthread_t t1, t2;
-	pthread_create(&t1, NULL, f1, &vars);
-	pthread_create(&t2, NULL, f1, &vars);
-
-	pthread_join(t1, NULL);
-	pthread_join(t2, NULL);
-
-	printf("%d\n", vars.eat_time);
-	pthread_mutex_destroy(&vars.mut);
-	return 0;
+	i = 0;
+	t_rules *rules;
+	if (ac < 5 || ac > 6)
+		return (printf("arg requared -> number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_meals]\n"));
+	rules = malloc(sizeof(t_rules));
+	if (!rules)
+		return (printf("malloc failed\n"));
+	if (!parse_args(rules, av, ac))
+		return (printf("Invalid args\n"), printf("Initialization failed\n"), 1);
+	if (init_philosophers(rules))
+		return (free(rules), 1);
+	for (int i = 0; i < rules->philo_n; i++)
+		printf("Philo %d forks (%d, %d)\n", rules->philos[i].id, rules->philos[i].left_fork, rules->philos[i].right_fork);
+	free(rules->forks);
+	free(rules->philos);
+	return (free(rules), 0);
 }
