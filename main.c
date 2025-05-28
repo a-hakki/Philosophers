@@ -1,14 +1,16 @@
-#include <stdio.h>
-#include <pthread.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
+/*   Updated: 2025/05/28 12:14:00 by ahakki           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-typedef struct s_vars {
-	int philo_n;
-	int sleep_time;
-	int die_time;
-	int eat_time;
-	int boul;
-	pthread_mutex_t mut;
-} t_vars;
+# include "philo.h"
 
 void *f1(void *vars)
 {
