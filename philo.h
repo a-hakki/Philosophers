@@ -4,30 +4,33 @@
 
 # include <stdio.h>
 # include <pthread.h>
+# include <sys/time.h>
 
 
 typedef struct s_philo
 {
-	int				id;
-	int				left_fork;
-	int				right_fork;
-	long			last_meal;
-	int				meal_count;
-	struct s_rules	*rules;
-}		t_philo;
+	int             id;
+	int             left_fork;
+	int             right_fork;
+	int             meal_count;
+	long            last_meal;
+	struct s_rules   *rules;
+} t_philo;
 
 typedef struct s_rules
 {
-	int				philo_n;
-	int				sleep_time;
-	int				die_time;
-	int				eat_time;
-	int				meal_n;
-	t_philo			*philos;
-	pthread_mutex_t	mut;
-	pthread_mutex_t	*forks;
+	int             philo_n;
+	int             die_time;
+	int             eat_time;
+	int             sleep_time;
+	int             meal_n;
+	int             someone_died;
+	int             all_ate_enough;
+	pthread_mutex_t *forks;
 	pthread_mutex_t print_mutex;
-}		t_rules;
+	pthread_mutex_t meal_check;
+	t_philo         *philos;
+} t_rules;
 
 
 // typedef struct s_vars {
