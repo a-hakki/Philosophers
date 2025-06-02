@@ -6,24 +6,24 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/01 15:28:12 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/02 09:14:13 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 #include "libft/libft.h"
-#include <sys/time.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-long get_time(void)
+
+long	get_time(void)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000L + tv.tv_usec / 1000L);
+	struct timeval	tv;
+	long			time;
+
+	gettimeofday(&tv, NULL);
+	time = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (time);
 }
+
 
 void	free_all(t_rules *rules)
 {
@@ -111,7 +111,6 @@ int	init_philosophers(t_rules *rules)
 			pthread_mutex_destroy(&rules->forks[i++]);
 		return (ft_free("11", rules->forks, rules->philos), 1);
 	}
-	// Initialize meal_check mutex
 	if (pthread_mutex_init(&rules->meal_check, NULL) != 0)
 	{
 		pthread_mutex_destroy(&rules->print_mutex);
@@ -121,31 +120,59 @@ int	init_philosophers(t_rules *rules)
 	}
 	return (0);
 }
-
-void	*monitor(void *arg)
+void	log_status(t_philo *philo, char *msg)
 {
-	return ;
+	pthread_mutex_lock(&philo->rules->print_mutex);
+	printf("%ld %d %s\n", get_time(), philo->id, msg);
+	pthread_mutex_unlock(&philo->rules->print_mutex);
 }
+
+// void	*monitor(void *arg)
+// {
+// 	return ;
+// }
 
 void	*routine(void *arg)
 {
-	return ;
+	t_philo	*philo = (t_philo *)arg;
+
+	if (philo->id % 2 == 0)
+		usleep(1000);
+	// lock the right fork && its print
+	pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
+	log_status(philo, "has taken a fork");
+
+	// lock the left fork && its print
+	pthread_mutex_lock(&philo->rules->forks[philo->left_fork]);
+	log_status(philo, "has taken a fork");
+
+	// lock the print for eating's msg
+	log_status(philo, "is eating");
+	philo->last_meal = get_time();  // Usually before eating
+	philo->meal_count++;
+	usleep(philo->rules->eat_time * 1000);
+
+	// lock the left and right fork
+	pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
+	pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
+
+	log_status(philo, "is sleeping");
+	usleep(philo->rules->sleep_time * 1000);
+
+	log_status(philo, "is thinking");
+	return (NULL);
 }
 
 int start_simulation(t_rules *rules)
 {
 	pthread_t	*threads;
-	pthread_t	monitor_thread;
+	// pthread_t	monitor_thread;
 	int			i;
 
 	threads = malloc(sizeof(pthread_t) * rules->philo_n);
 	if (!threads)
 		return (1);
-
-	i = 0;
-	rules->someone_died = 0;
-	rules->all_ate_enough = 0;
-
+	ft_init(3, &i, &rules->someone_died, &rules->all_ate_enough);
 	while (i < rules->philo_n)
 	{
 		rules->philos[i].last_meal = get_time();
@@ -153,20 +180,13 @@ int start_simulation(t_rules *rules)
 			return (free(threads), 1);
 		i++;
 	}
-
-	if (pthread_create(&monitor_thread, NULL, monitor, rules) != 0)
-		return (free(threads), 1);
-
+	// if (pthread_create(&monitor_thread, NULL, monitor, rules) != 0)
+	// 	return (free(threads), 1);
 	i = 0;
 	while (i < rules->philo_n)
-	{
-		pthread_join(threads[i], NULL);
-		i++;
-	}
-	pthread_join(monitor_thread, NULL);
-
-	free(threads);
-	return (0);
+		pthread_join(threads[i++], NULL);
+	// pthread_join(monitor_thread, NULL);
+	return (free(threads), 0);
 }
 
 int main(int ac, char **av)
