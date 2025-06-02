@@ -7,6 +7,11 @@
 # include <stdlib.h>
 # include <unistd.h>
 
+# define IS_T_FORK "has taken a fork"
+# define IS_EAT "is eating"
+# define IS_SLP "is sleeping"
+# define IS_TNK "is thinking"
+
 typedef struct s_philo
 {
 	int             id;
@@ -19,6 +24,7 @@ typedef struct s_philo
 
 typedef struct s_rules
 {
+	long            start_time;
 	int             philo_n;
 	int             die_time;
 	int             eat_time;
