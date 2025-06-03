@@ -3,6 +3,7 @@
         "philo.h": "c",
         "stdio.h": "c",
         "unistd.h": "c",
-        "format": "c"
+        "format": "c",
+        "stdlib.h": "c"
     }
 }

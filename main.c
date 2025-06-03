@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 15:00:04 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 22:25:56 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,9 @@ void	*monitor(void *arg)
 
 void	*ft_philo_one(t_rules *rules)
 {
+	rules->all_ate_enough = 0;
+	rules->someone_died = 0;
+	rules->philos[0].start_time = get_time();
 	pthread_mutex_lock(rules->forks);
 	log_status(rules->philos, "has taken a fork");
 	pthread_mutex_unlock(rules->forks);
