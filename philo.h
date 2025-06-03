@@ -33,7 +33,8 @@ typedef struct s_rules
 	int             meal_n;
 	int             someone_died;
 	int             all_ate_enough;
-	long             usleep;
+	int				philo_die;
+	long			philo_time_die;
 	pthread_mutex_t *forks;
 	pthread_mutex_t print_mutex;
 	pthread_mutex_t meal_check;

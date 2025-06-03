@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 12:27:27 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 12:56:51 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,8 @@ void	check_is_die(t_rules *rules)
 			rules->someone_died = 1;
 			pthread_mutex_unlock(&rules->meal_check);
 			pthread_mutex_lock(&rules->print_mutex);
-			printf("%ld %d died\n", get_time() - rules->philos->start_time, rules->philos[i].id);
+			rules->philo_die = rules->philos[i].id;
+			rules->philo_time_die = get_time() - rules->philos->start_time;
 			pthread_mutex_unlock(&rules->print_mutex);
 			return ;
 		}
@@ -225,16 +226,21 @@ void	*monitor(void *arg)
 
 int	ft_lock_fork(t_philo *philo)
 {
+	pthread_mutex_t take_fork;
+	pthread_mutex_init(&take_fork, NULL);
 	if (is_dead_or_full(philo))
 		return (0);
+	pthread_mutex_lock(&take_fork);
 	pthread_mutex_lock(&philo->rules->forks[philo->left_fork]);
+	pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
+	pthread_mutex_unlock(&take_fork);
 	log_status(philo, IS_T_FORK);
 	if (is_dead_or_full(philo))
 	{
 		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
+		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
 		return (0);
 	}
-	pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
 	log_status(philo, IS_T_FORK);
 	if (is_dead_or_full(philo))
 	{
@@ -358,11 +364,14 @@ int main(int ac, char **av)
 		return (printf("Invalid args\n"), printf("Initialization failed\n"), 1);
 	if (init_philosophers(&rules))
 		return (1);
-	// rules.start_time = get_time();
 	if (rules.philo_n == 1)
 		ft_philo_one(&rules);
 	else if (start_simulation(&rules))
 		return (free_all(&rules), 1);
+	if (rules.someone_died)
+	{
+		printf("%ld %d died\n", rules.philo_time_die, rules.philo_die);
+	}
 	free_all(&rules);
 	return (0);
 }
