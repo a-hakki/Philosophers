@@ -19,12 +19,13 @@ typedef struct s_philo
 	int             right_fork;
 	int             meal_count;
 	long            last_meal;
+	long            start_time;
 	struct s_rules   *rules;
 } t_philo;
 
 typedef struct s_rules
 {
-	long            start_time;
+	// long            start_time;
 	int             philo_n;
 	int             die_time;
 	int             eat_time;
@@ -32,20 +33,11 @@ typedef struct s_rules
 	int             meal_n;
 	int             someone_died;
 	int             all_ate_enough;
+	long             usleep;
 	pthread_mutex_t *forks;
 	pthread_mutex_t print_mutex;
 	pthread_mutex_t meal_check;
 	t_philo         *philos;
 } t_rules;
-
-
-// typedef struct s_vars {
-// 	int philo_n;
-// 	int sleep_time;
-// 	int die_time;
-// 	int eat_time;
-// 	int boul;
-// 	pthread_mutex_t mut;
-// }		t_vars;
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/02 15:21:26 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 10:17:19 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,6 @@ void	free_all(t_rules *rules)
 {
 	int	i;
 
-	if (!rules)
-		return ;
-
 	if (rules->forks)
 	{
 		i = 0;
@@ -68,8 +65,6 @@ void	free_all(t_rules *rules)
 
 	if (rules->philos)
 		free(rules->philos);
-
-	free(rules);
 }
 
 int parse_args(t_rules *rules, char **av, int ac)
@@ -148,7 +143,7 @@ void	log_status(t_philo *philo, char *msg)
 		pthread_mutex_unlock(&philo->rules->print_mutex);
 		return ;
 	}
-	printf("%ld %d %s\n", get_time() - philo->rules->start_time, philo->id, msg);
+	printf("%ld %d %s\n", get_time() - philo->start_time, philo->id, msg);
 	pthread_mutex_unlock(&philo->rules->print_mutex);
 }
 
@@ -169,7 +164,7 @@ void	check_is_die(t_rules *rules)
 			rules->someone_died = 1;
 			pthread_mutex_unlock(&rules->meal_check);
 			pthread_mutex_lock(&rules->print_mutex);
-			printf("%ld %d died\n", get_time() - rules->start_time, rules->philos[i].id);
+			printf("%ld %d died\n", get_time() - rules->philos->start_time, rules->philos[i].id);
 			pthread_mutex_unlock(&rules->print_mutex);
 			return ;
 		}
@@ -245,47 +240,33 @@ int	ft_lock_fork(t_philo *philo)
 	return (1);
 }
 
-// void	check(t_philo *philo)
-// {
-	
-// }
 
 void	routine_helper(t_philo *philo)
 {
 	if (is_dead_or_full(philo))
 		return;
-
 	if (!ft_lock_fork(philo))
 		return;
-
 	if (is_dead_or_full(philo))
 	{
 		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
 		return;
 	}
-
 	log_status(philo, IS_EAT);
-
 	pthread_mutex_lock(&philo->rules->meal_check);
 	philo->last_meal = get_time();
 	philo->meal_count++;
 	pthread_mutex_unlock(&philo->rules->meal_check);
-
 	smart_sleep(philo->rules->eat_time, philo);
-
 	pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 	pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
-
 	if (is_dead_or_full(philo))
 		return;
-
 	log_status(philo, IS_SLP);
 	smart_sleep(philo->rules->sleep_time, philo);
-
 	if (is_dead_or_full(philo))
 		return;
-
 	log_status(philo, IS_TNK);
 }
 
@@ -298,7 +279,6 @@ void	*routine(void *arg)
 
 	if (philo->id % 2 != 0)
 		usleep(100);
-
 	while (1)
 	{
 		pthread_mutex_lock(&philo->rules->meal_check);
@@ -329,6 +309,7 @@ int start_simulation(t_rules *rules)
 	rules->all_ate_enough = 0;
 	while (i < rules->philo_n)
 	{
+		rules->philos[i].start_time = get_time();
 		rules->philos[i].last_meal = get_time();
 		if (pthread_create(&threads[i], NULL, routine, &rules->philos[i]) != 0)
 			return (free(threads), 1);
@@ -356,22 +337,19 @@ void	*ft_philo_one(t_rules *rules)
 
 int main(int ac, char **av)
 {
-	t_rules *rules;
+	t_rules rules;
 
 	if (ac < 5 || ac > 6)
 		return (printf("arg required -> number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_meals]\n"));
-	rules = malloc(sizeof(t_rules));
-	if (!rules)
-		return (printf("malloc failed\n"));
-	if (!parse_args(rules, av, ac))
+	if (!parse_args(&rules, av, ac))
 		return (printf("Invalid args\n"), printf("Initialization failed\n"), 1);
-	if (init_philosophers(rules))
-		return (free(rules), 1);
-	rules->start_time = get_time();
-	if (rules->philo_n == 1)
-		ft_philo_one(rules);
-	else if (start_simulation(rules))
-		return (free_all(rules), 1);
-	free_all(rules);
+	if (init_philosophers(&rules))
+		return (1);
+	// rules.start_time = get_time();
+	if (rules.philo_n == 1)
+		ft_philo_one(&rules);
+	else if (start_simulation(&rules))
+		return (free_all(&rules), 1);
+	free_all(&rules);
 	return (0);
 }
