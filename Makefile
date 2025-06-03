@@ -1,5 +1,32 @@
 
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
+RM = rm -rf
+NAME = philo
+SOURCES = \
+	atoi.c \
+	forks.c \
+	checks.c \
+	init.c \
+	main.c \
+	routing.c \
+	utiles.c
 
+OBJECTS = $(SOURCES:.c=.o)
 
-all:
-	cc -Wall -Wextra -Werror main.c libft/libft.a -o philo
+all: $(NAME)
+
+$(NAME): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
+
+clean:
+	$(RM) $(OBJECTS)
+
+fclean: clean
+	$(RM) $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
+.SECONDARY: $(OBJECTS)
+
