@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 14:08:06 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 15:00:04 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,16 @@ void	log_status(t_philo *philo, char *msg)
 
 void	*monitor(void *arg)
 {
-	t_rules	*rules = (t_rules *)arg;
+	t_rules	*rules;
 
+	rules = (t_rules *)arg;
 	while (1)
 	{
 		pthread_mutex_lock(&rules->meal_check);
 		if (rules->someone_died || rules->all_ate_enough)
 		{
 			pthread_mutex_unlock(&rules->meal_check);
-			break;
+			break ;
 		}
 		pthread_mutex_unlock(&rules->meal_check);
 		check_is_die(rules);
@@ -54,13 +55,13 @@ void	*ft_philo_one(t_rules *rules)
 	return (NULL);
 }
 
-
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
-	t_rules rules;
+	t_rules	rules;
 
 	if (ac < 5 || ac > 6)
-		return (printf("arg required -> number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_meals]\n"));	
+		return (printf("arg required -> number_of_philosophers time_to_die \
+time_to_eat time_to_sleep [number_of_meals]\n"));
 	if (!parse_args(&rules, av, ac))
 		return (printf("Invalid args\n"), printf("Initialization failed\n"), 1);
 	if (init_philosophers(&rules))

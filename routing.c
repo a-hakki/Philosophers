@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:05:11 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 14:06:37 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 15:16:36 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,14 @@
 void	routine_helper(t_philo *philo)
 {
 	if (is_dead_or_full(philo))
-		return;
+		return ;
 	if (!ft_lock_fork(philo))
-		return;
+		return ;
 	if (is_dead_or_full(philo))
 	{
 		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
 		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
-		return;
+		return ;
 	}
 	log_status(philo, IS_EAT);
 	smart_sleep(philo->rules->eat_time, philo);
@@ -33,18 +33,19 @@ void	routine_helper(t_philo *philo)
 	pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 	pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
 	if (is_dead_or_full(philo))
-		return;
+		return ;
 	log_status(philo, IS_SLP);
 	smart_sleep(philo->rules->sleep_time, philo);
 	if (is_dead_or_full(philo))
-		return;
+		return ;
 	log_status(philo, IS_TNK);
 }
 
 void	*routine(void *arg)
 {
-	t_philo	*philo = (t_philo *)arg;
+	t_philo	*philo;
 
+	philo = (t_philo *)arg;
 	if (philo->id % 2 != 0)
 	{
 		if (philo->rules->philo_n < 100)
@@ -54,24 +55,18 @@ void	*routine(void *arg)
 	}
 	while (1)
 	{
-		pthread_mutex_lock(&philo->rules->meal_check);
-		if (philo->rules->someone_died || philo->rules->all_ate_enough)
-		{
-			pthread_mutex_unlock(&philo->rules->meal_check);
-			break;
-		}
-		pthread_mutex_unlock(&philo->rules->meal_check);
+		if (is_dead_or_full(philo))
+			break ;
 		routine_helper(philo);
-	if (philo->rules->philo_n < 100)
-		usleep(1000);
-	else
-		usleep(10 * philo->rules->philo_n);
+		if (philo->rules->philo_n < 100)
+			usleep(1000);
+		else
+			usleep(10 * philo->rules->philo_n);
 	}
 	return (NULL);
 }
 
-
-int start_simulation(t_rules *rules)
+int	start_simulation(t_rules *rules)
 {
 	pthread_t	*threads;
 	pthread_t	monitor_thread;

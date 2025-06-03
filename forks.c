@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:07:10 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 14:24:06 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 15:17:26 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,20 @@ int	is_dead_or_full(t_philo *philo)
 	return (result);
 }
 
-void smart_sleep(long duration_ms, t_philo *philo)
+void	smart_sleep(long duration_ms, t_philo *philo)
 {
 	long	start;
 
 	start = get_time();
 	while (!is_dead_or_full(philo) && (get_time() - start) < duration_ms)
-	{	
+	{
 		if (philo->rules->philo_n < 100)
 			usleep(500);
 		else
 			usleep(5 * philo->rules->philo_n);
 	}
 }
+
 void	ft_unlock_fork(t_philo *philo)
 {
 	if (philo->id % 2 == 0)

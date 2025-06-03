@@ -6,13 +6,13 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:02:04 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 14:12:47 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 15:03:37 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long	get_time()
+long	get_time(void)
 {
 	struct timeval	tv;
 	long			time;
@@ -44,7 +44,7 @@ void	free_all(t_rules *rules)
 		free(rules->philos);
 }
 
-int parse_args(t_rules *rules, char **av, int ac)
+int	parse_args(t_rules *rules, char **av, int ac)
 {
 	rules->philo_n = atoi(av[1]);
 	rules->die_time = atoi(av[2]);
@@ -53,7 +53,8 @@ int parse_args(t_rules *rules, char **av, int ac)
 	rules->meal_n = -1;
 	if (ac == 6)
 		rules->meal_n = atoi(av[5]);
-	if (rules->philo_n <= 0 || rules->die_time <= 0 || rules->eat_time <= 0 || rules->sleep_time <= 0)
+	if (rules->philo_n <= 0 || rules->die_time <= 0 || \
+		rules->eat_time <= 0 || rules->sleep_time <= 0)
 		return (0);
 	if (ac == 6 && rules->meal_n <= 0)
 		return (0);
