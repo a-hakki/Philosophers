@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 12:56:51 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 13:46:04 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,28 +224,41 @@ void	*monitor(void *arg)
 	return (NULL);
 }
 
+void ft_unlock_fork(t_philo *philo)
+{
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
+		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
+	}
+	else
+	{
+		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
+		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
+	}
+}
+
 int	ft_lock_fork(t_philo *philo)
 {
-	pthread_mutex_t take_fork;
-	pthread_mutex_init(&take_fork, NULL);
 	if (is_dead_or_full(philo))
 		return (0);
-	pthread_mutex_lock(&take_fork);
-	pthread_mutex_lock(&philo->rules->forks[philo->left_fork]);
-	pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
-	pthread_mutex_unlock(&take_fork);
-	log_status(philo, IS_T_FORK);
-	if (is_dead_or_full(philo))
+	if (philo->id % 2 == 0)
 	{
-		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
-		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
-		return (0);
+		pthread_mutex_lock(&philo->rules->forks[philo->left_fork]);
+		log_status(philo, IS_T_FORK);
+		pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
+		log_status(philo, IS_T_FORK);
 	}
-	log_status(philo, IS_T_FORK);
+	else
+	{
+		pthread_mutex_lock(&philo->rules->forks[philo->right_fork]);
+		log_status(philo, IS_T_FORK);
+		pthread_mutex_lock(&philo->rules->forks[philo->left_fork]);
+		log_status(philo, IS_T_FORK);
+	}
 	if (is_dead_or_full(philo))
 	{
-		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
-		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
+		ft_unlock_fork(philo);
 		return (0);
 	}
 	return (1);
