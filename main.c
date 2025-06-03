@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 12:17:55 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 12:27:27 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,8 +238,8 @@ int	ft_lock_fork(t_philo *philo)
 	log_status(philo, IS_T_FORK);
 	if (is_dead_or_full(philo))
 	{
-		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
+		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 		return (0);
 	}
 	return (1);
@@ -254,8 +254,8 @@ void	routine_helper(t_philo *philo)
 		return;
 	if (is_dead_or_full(philo))
 	{
-		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 		pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
+		pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 		return;
 	}
 	log_status(philo, IS_EAT);
