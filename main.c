@@ -6,7 +6,7 @@
 /*   By: ahakki <ahakki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 12:13:08 by ahakki            #+#    #+#             */
-/*   Updated: 2025/06/03 10:17:19 by ahakki           ###   ########.fr       */
+/*   Updated: 2025/06/03 12:17:55 by ahakki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,12 @@ void smart_sleep(long duration_ms, t_philo *philo)
 
 	start = get_time();
 	while (!is_dead_or_full(philo) && (get_time() - start) < duration_ms)
-		usleep(500);
+	{	
+		if (philo->rules->philo_n < 100)
+			usleep(500);
+		else
+			usleep(5 * philo->rules->philo_n);
+	}
 }
 
 void	free_all(t_rules *rules)
@@ -213,7 +218,7 @@ void	*monitor(void *arg)
 		pthread_mutex_unlock(&rules->meal_check);
 		check_is_die(rules);
 		check_is_full(rules);
-		usleep(1000);
+		usleep(100 * rules->philo_n);
 	}
 	return (NULL);
 }
@@ -254,11 +259,11 @@ void	routine_helper(t_philo *philo)
 		return;
 	}
 	log_status(philo, IS_EAT);
+	smart_sleep(philo->rules->eat_time, philo);
 	pthread_mutex_lock(&philo->rules->meal_check);
 	philo->last_meal = get_time();
 	philo->meal_count++;
 	pthread_mutex_unlock(&philo->rules->meal_check);
-	smart_sleep(philo->rules->eat_time, philo);
 	pthread_mutex_unlock(&philo->rules->forks[philo->left_fork]);
 	pthread_mutex_unlock(&philo->rules->forks[philo->right_fork]);
 	if (is_dead_or_full(philo))
@@ -278,7 +283,12 @@ void	*routine(void *arg)
 	t_philo	*philo = (t_philo *)arg;
 
 	if (philo->id % 2 != 0)
-		usleep(100);
+	{
+		if (philo->rules->philo_n < 100)
+			usleep(1000);
+		else
+			usleep(10 * philo->rules->philo_n);
+	}
 	while (1)
 	{
 		pthread_mutex_lock(&philo->rules->meal_check);
@@ -289,7 +299,10 @@ void	*routine(void *arg)
 		}
 		pthread_mutex_unlock(&philo->rules->meal_check);
 		routine_helper(philo);
-		usleep(100);
+	if (philo->rules->philo_n < 100)
+		usleep(1000);
+	else
+		usleep(10 * philo->rules->philo_n);
 	}
 	return (NULL);
 }
@@ -340,7 +353,7 @@ int main(int ac, char **av)
 	t_rules rules;
 
 	if (ac < 5 || ac > 6)
-		return (printf("arg required -> number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_meals]\n"));
+		return (printf("arg required -> number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_meals]\n"));	
 	if (!parse_args(&rules, av, ac))
 		return (printf("Invalid args\n"), printf("Initialization failed\n"), 1);
 	if (init_philosophers(&rules))
