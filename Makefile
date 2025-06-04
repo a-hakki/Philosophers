@@ -9,7 +9,7 @@ SOURCES = \
 	checks.c \
 	init.c \
 	main.c \
-	routing.c \
+	routine.c \
 	utiles.c
 
 OBJECTS = $(SOURCES:.c=.o)
